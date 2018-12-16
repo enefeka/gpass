@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use \Firebase\JWT\JWT;
 
 class UserController extends Controller
 {
@@ -35,38 +36,68 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     
-    public function login()
+    protected function login(Request $request)
     {
-        $email = $_POST['email'];
-        $user = self::findUser($email);        
-        
-        $password = $_POST['password'];
-
-        if (password_verify($password, $user->password) and $user->email == $email) 
+        if (!isset($_POST['email']) or !isset($_POST['password'])) 
         {
-            $token = self::generateToken($email, $password);
-            return response()->json ([
-                'token' => $token
-            ]);
+            return $this->error(401, 'Debes rellenar todos los campos')->header('Access-Control-Allow-Origin', '*');
         }
-
-
-
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+        $key = $this->key;
+        if (self::checkLogin($email, $password))
+        {
+            $array = $arrayName = array
+            (
+                 'email' => $email,
+                 'password' => $password
+            );
+            $jwt = JWT::encode($array, $key);
+            return response($jwt)->header('Access-Control-Allow-Origin', '*');
+        }
+        else
+        {
+            return response("Los datos no son correctos", 402)->header('Access-Control-Allow-Origin', '*');
+        }
     }
 
+    public function register (Request $request)
+    {
+        if (!isset($_POST['name']) or !isset($_POST['email']) or !isset($_POST['password'])) 
+        {
+            return $this->error(1, 'Debes rellenar todos los campos');
+        }
+
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+
+        if (!empty($name) && !empty($email) && !empty($password))
+        {
+            try
+            {
+            $users = new User();
+            $users->name = $name;
+            $users->password = $password;
+            $users->email = $email;
+            $users->role_id = 2;
+
+            $users->save();
+        }
+        catch(Exception $e)
+            {
+                return $this->error(2, $e->getMessage());
+            }
+            
+            return $this->error(200, 'Usuario registrado correctamente');
+        }
+        else
+        {
+            return $this->error(401, 'Debes rellenar todos los campos');
+        }
+    }  
     public function store(Request $request)
     {
-
-                $user = new User();
-
-                $user->name = $request->name;
-                $user->email = $request->email;
-                $user->password = $request->password;
-                $user->role_id = 2;
-
-                $user->save();
-
-
 
     }
 
@@ -114,10 +145,5 @@ class UserController extends Controller
     {
         //
     }
-    private function error($code, $message)
-    {
-        $json = ['code' => $code, 'message' => $message];
-        $json = json_encode($json);
-        return  response($json, 200)->header('Access-Control-Allow-Origin', '*');
-    }
+
 }
