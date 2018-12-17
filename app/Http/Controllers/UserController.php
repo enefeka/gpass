@@ -57,7 +57,7 @@ class UserController extends Controller
         }
         else
         {
-            return response("Los datos no son correctos", 402)->header('Access-Control-Allow-Origin', '*');
+            return response("Los datos no son correctos", 403)->header('Access-Control-Allow-Origin', '*');
         }
     }
 
@@ -65,26 +65,53 @@ class UserController extends Controller
     {
         if (!isset($_POST['name']) or !isset($_POST['email']) or !isset($_POST['password'])) 
         {
-            return $this->error(1, 'Debes rellenar todos los campos');
+            return $this->error(401, 'Debes rellenar todos los campos');
         }
+
+       
 
         $name = $_POST['name'];
         $email = $_POST['email'];
         $password = $_POST['password'];
+        $users = User::where('email', $email)->get();
+        foreach ($users as &$user) 
+        {
+            if ($user->email == $email) 
+            {
+                return $this->error(400, 'El email ya existe'); 
+            }
+        }
+
+
+        if (!preg_match("/^[a-zA-Z ]*$/",$name)) {
+            return $this->error(400, 'El nombre solo puede contener caracteres sin espacios en blanco'); 
+        } 
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->error(400, 'Introduzca un email valido'); 
+        }
+
+        if (strlen($password) < 8){
+            return $this->error(400, 'La contraseña debe tener al  menos 8 caracteres');
+        }
+
+    
+        
+    
 
         if (!empty($name) && !empty($email) && !empty($password))
         {
             try
             {
-            $users = new User();
-            $users->name = $name;
-            $users->password = $password;
-            $users->email = $email;
-            $users->role_id = 2;
+                $users = new User();
+                $users->name = $name;
+                $users->password = $password;
+                $users->email = $email;
+                $users->role_id = 2;
 
-            $users->save();
-        }
-        catch(Exception $e)
+                $users->save();
+            }
+            catch(Exception $e)
             {
                 return $this->error(2, $e->getMessage());
             }
@@ -95,7 +122,9 @@ class UserController extends Controller
         {
             return $this->error(401, 'Debes rellenar todos los campos');
         }
-    }  
+    }
+
+
     public function store(Request $request)
     {
 
@@ -145,5 +174,4 @@ class UserController extends Controller
     {
         //
     }
-
 }

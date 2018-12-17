@@ -14,7 +14,7 @@ $(document).ready(function(){
             console.log(data);                
           },
            error: function(data, text, done){
-           	console.log(data.statusCode);
+           	console.log(data.responseText);
            }
 
         });
