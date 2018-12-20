@@ -15,7 +15,8 @@ $(document).ready(function(){
            },
            cache: false,
            success: function(data, text, done){
-            console.log(data);                
+            console.log(data);
+            window.location.href='login.html'               
           },
            error: function(data, text, done){
            	console.log(data.responseText);

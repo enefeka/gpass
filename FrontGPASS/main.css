@@ -20,7 +20,7 @@ input[type=text]:focus, input[type=password]:focus {
   outline: none;
 }
 
-input[type=submit]{
+input[type=submit], input[type=button]{
   font-size: 20px ;
 }
 
@@ -31,7 +31,7 @@ hr {
 }
 
 
-.registerbtn, .loginbtn {
+.registerbtn, .loginbtn, .catbtn, .pwdbtn {
   background-color: #00688B;
   color: white;
   padding: 16px 20px;
@@ -42,6 +42,17 @@ hr {
   opacity: 0.9;
 }
 
+.deletebtn{
+  background-color: #FF0000;
+  margin: 5px 10px;
+  color: white;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.deletebtn:hover {
+  opacity:1;
+}
 .registerbtn:hover {
   opacity:1;
 }

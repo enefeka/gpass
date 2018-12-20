@@ -47,13 +47,19 @@ class UserController extends Controller
         $key = $this->key;
         if (self::checkLogin($email, $password))
         {
+            
+            $userSave = User::where('email', $email)->first();
+
             $array = $arrayName = array
             (
-                 'email' => $email,
-                 'password' => $password
+                'id' => $userSave->id,
+                'email' => $email,
+                'password' => $password,
+                'name' => $userSave->name
             );
-            $jwt = JWT::encode($array, $key);
-            return response($jwt)->header('Access-Control-Allow-Origin', '*');
+            $token= JWT::encode($array, $key);
+            return response($token)->header('Access-Control-Allow-Origin', '*');
+
         }
         else
         {

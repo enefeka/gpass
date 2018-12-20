@@ -16,4 +16,11 @@ class Authenticate extends Middleware
     {
         return route('login');
     }
+    public function handle($request, Closure $next)
+    {
+        if ($this->auth->guest())
+        {
+            return redirect()->guest('auth/login');
+        }
+    }
 }

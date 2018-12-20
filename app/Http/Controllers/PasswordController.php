@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Password;
 use Illuminate\Http\Request;
+use \Firebase\JWT\JWT;
+use App\User;
+use App\Category;
 
 class PasswordController extends Controller
 {
@@ -14,7 +17,26 @@ class PasswordController extends Controller
      */
     public function index()
     {
-        //
+
+        $headers = getallheaders();
+        $token = $headers['Authorization'];
+        $key = $this->key;
+        $userData = JWT::decode($token, $key, array('HS256'));
+        $id = User::where('email', $userData->email)->first()->id;
+        $passwords = Password::where('user_id', $id)->get();
+        if ($passwords->isEmpty()) { 
+            return $this->error(400, "No hay passwords.");
+        }
+        $passwordTitles = [];
+        $passwordIDs = [];
+        foreach ($passwords as $password) {
+            array_push($passwordTitles, $password->title);
+            array_push($passwordIDs, $password->id);
+            } 
+        return response()->json ([
+                'passwords' => $passwordTitles,
+                'ids' => $passwordIDs,
+            ]);
     }
 
     /**
@@ -33,10 +55,45 @@ class PasswordController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+     public function store(Request $request)
     {
-        //
-    }
+        $headers = getallheaders();
+        $token = $headers['Authorization'];
+        $key = $this->key;
+        $userData = JWT::decode($token, $key, array('HS256'));
+        $passwordTitle = $_POST['passwordTitle'];
+        $passwordPwd = $_POST['passwordPwd'];
+        $categoryName = $_POST['categoryName'];
+        $id = User::where('email', $userData->email)->first()->id;
+        $idCat = Category::where('name', $categoryName)->first()->id;
+
+
+        $passwords = Password::where('user_id', $id)->get();
+        foreach ($passwords as &$password) 
+        {
+            if ($password->title == $passwordTitle) 
+            {
+                return $this->error(400, 'El nombre de la contraseña ya existe'); 
+            }
+        }
+        
+        if ($this->checkLogin($userData->email , $userData->password)) 
+        { 
+            $password = new Password();
+            $password->title = $passwordTitle;
+            $password->user_id = $id;
+            $password->password = $passwordPwd;
+            $password->category_id = $idCat;
+            $password->save();                                                                                         
+
+            return $this->success('Contraseña creada');
+
+        }
+        else
+        {
+            return $this->error(401, "No tienes permisos");
+        }
+     }
 
     /**
      * Display the specified resource.
@@ -78,8 +135,10 @@ class PasswordController extends Controller
      * @param  \App\Password  $password
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Password $password)
+    public function destroy($id)
     {
-        //
+        Password::destroy($id);
+
+        return $this->success('Contraseña borrada');
     }
 }

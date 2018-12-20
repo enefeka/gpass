@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cliente Web GPASS</title>
+	<link rel="stylesheet" type="text/css" href="main.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="categories.js"></script>
+</head>
+<body>
+
+
+
+<form action="categories.js" method="post">
+  <div class="container">
+    <h1>Crear Categoría</h1>
+    <p>Introduzca nombre de la categoría</p>
+    <hr>
+   
+    <label for="categoria"><b>Categoria</b></label>
+    <input type="text" placeholder="Introduzca Nombre Categoría" name="categoryName" id="categoryName" required>
+
+
+    <hr>
+
+    <input type="submit" id="cat-submit" class="catbtn" value="Crear">
+
+    <label for="categoria"><b>Lista de categorías</b></label>
+        <div id="categoriesList">
+        <div class="category"></div>
+  </div>
+</form>
+
+
+
+
+
+
+	
+
+
+
+</script>
+
+
+</body>
+</html>
